@@ -20,8 +20,10 @@
     // Do any additional setup after loading the view.
     
     [[FLYLocationManager sharedManager] requestLocation:^(CLLocation *location) {
+        
         NSLog(@"location = %@", location);
-    }];
+        
+    } error:nil];
 }
 
 

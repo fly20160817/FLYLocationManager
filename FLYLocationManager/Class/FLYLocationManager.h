@@ -10,6 +10,7 @@
 #import <CoreLocation/CoreLocation.h>
 
 typedef void(^LocationBlock)(CLLocation * location);
+typedef void(^ErrorBlock)(NSError * error);
 
 @interface FLYLocationManager : NSObject
 
@@ -22,7 +23,7 @@ typedef void(^LocationBlock)(CLLocation * location);
 
 
 /**获取一次位置信息（不需要调用开始更新位置）*/
-- (void)requestLocation:(LocationBlock)location;
+- (void)requestLocation:(LocationBlock)location error:(ErrorBlock)error;
 
 /**开始更新位置*/
 - (void)startUpdatingLocation;

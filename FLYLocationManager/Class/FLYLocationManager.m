@@ -13,6 +13,7 @@
 
 @property (nonatomic, strong) CLLocationManager * locationManager;
 @property (nonatomic, copy) LocationBlock locationBlock;
+@property (nonatomic, copy) ErrorBlock error;
 
 @end
 
@@ -99,7 +100,12 @@ static FLYLocationManager * _sharedManager;
     self.latitude = location.coordinate.latitude;
     self.longitude = location.coordinate.longitude;
     
-    self.locationBlock(location);
+    if ( self.locationBlock )
+    {
+        self.locationBlock(location);
+        //Block调用完之后置空，不然每次走这个代理时都会调用外部的Block
+        self.locationBlock = nil;
+    }
     
     
     //%f只会默认输入小数点后6位，需要多输出，强制指定就可以了
@@ -115,6 +121,8 @@ static FLYLocationManager * _sharedManager;
     if ( error )
     {
         [self checkError:error];
+        
+        !self.error ?: self.error(error);
     }
 }
 
@@ -123,15 +131,20 @@ static FLYLocationManager * _sharedManager;
 #pragma mark - LocationManager
 
 //获取一次位置信息
--(void)requestLocation:(LocationBlock)location
+- (void)requestLocation:(LocationBlock)location error:(ErrorBlock)error
 {
     if ( [CLLocationManager authorizationStatus] == kCLAuthorizationStatusDenied )
     {
         [FLYLocationManager alertOpenAuthorization];
+        
+        NSError * e = [NSError errorWithDomain:@"用户拒绝了定位权限" code:999 userInfo:nil];
+        error(e);
         return;
     }
     
     self.locationBlock = location;
+    self.error = error;
+    
     //如果没有授权过，系统会去询问，询问过会回来继续执行这句
     [self.locationManager requestLocation];
 }
